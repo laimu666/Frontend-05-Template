@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+
+<style>
+#board {
+  width: 300px;
+  height: 300px;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: pink;
+}
+
+.cell {
+  width: 33.3%;
+  height: 33.3%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #fff;
+  box-sizing: border-box;
+}
+</style>
+
+<div id="board"></div>
+  
+<script>
+  let arr = [
+    ['0', '0', '0'],
+    ['0', '0', '0'],
+    ['0', '0', '0']
+  ]
+
+  let icon = '1'
+
+  // 渲染棋盘
+  function show() {
+    let board = document.getElementById('board')
+    board.innerHTML = ''
+    for (let i=0; i<=arr.length -1; i++) {
+      for (let j=0; j<=arr[i].length-1; j++) {
+        let cell = document.createElement('div')
+        cell.classList.add('cell')
+        cell.addEventListener('click', ()=>click(i, j))
+        let inner = arr[i][j] == '1' ? '⭕️' : arr[i][j] == '2' ? '❌' : ''
+        cell.innerText = inner
+        board.appendChild(cell)
+      }
+    }
+  }
+
+  // 每一格点击事件
+  function click (i, j) {
+    if (arr[i][j] != '0') {
+      return false
+    }
+    arr[i][j] = icon
+    if (check(arr, icon)) {
+      alert((icon == '1' ? '⭕️' : '❌') + 'is winner')
+    }
+    icon = 3 - icon
+    show()
+    if (willWin(arr, icon)) {
+      console.log((icon == '1' ? '⭕️' : '❌') + 'will winner')
+    }
+  }
+
+  // 判断是否胜利
+  function check (arr, icon) {
+    // 判断每一行
+    {
+      for (let i=0; i<=arr.length-1; i++) {
+        let win = true
+        for (let j=0; j<=arr[i].length-1; j++) {
+          if (arr[i][j] != icon) {
+            win = false
+          }
+        }
+        if (win) {
+          return true
+        }
+      }
+    }
+    // 判断每一列
+    {
+      for (let i=0; i<=arr.length-1; i++) {
+        let win = true
+        for (let j=0; j<=arr[i].length-1; j++) {
+          if (arr[j][i] != icon) {
+            win = false
+          }
+        }
+        if (win) {
+          return true
+        }
+      }
+    }
+    // 判断左斜
+    {
+      let win = true
+      for (let j=0; j<=arr.length-1; j++) {
+          if (arr[j][j] != icon){
+            win = false
+          }
+        }
+      if (win) {
+        return true
+      }
+    }
+    // 判断右斜
+    {
+      let win = true
+      for (let j=0; j<=arr.length-1; j++) {
+          if (arr[j][2-j] != icon){
+            win = false
+          }
+        }
+      if (win) {
+        return true
+      }
+    }
+  }
+
+  // 判断是否要赢
+  function willWin (arr, icon) {
+    let flag = false
+    for (let i=0; i<=arr.length-1; i++) {
+      for (let j=0; j<=arr[i].length-1; j++) {
+        if (arr[i][j] == '0') {
+          let cloneArr = clone(arr)
+          cloneArr[i][j] = icon
+          if (check(cloneArr, icon)) {
+            flag = true
+          }
+        }
+      }
+    }
+    return flag
+  }
+
+  // 克隆数组
+  function clone (arr) {
+    return JSON.parse(JSON.stringify(arr))
+  }
+
+  show()
+
+</script>
+
+</body>
+
+</html>
