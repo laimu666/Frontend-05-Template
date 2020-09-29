@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+
+  <style>
+    div {
+      background-color: grey;
+      display: inline-block;
+      margin: 30px;
+      width: 100px;
+      height: 100px;
+      border-radius: 100%;
+    }
+    .green.light {
+      background-color: green;
+    }
+
+    .yellow.light {
+      background-color: yellow;
+    }
+
+    .red.light {
+      background-color: red;
+    }
+  </style>
+
+  <div class="green"></div>
+  <div class="yellow"></div>
+  <div class="red"></div>
+  <input type="button" id="button" value="reset">
+
+  <script>
+    function green () {
+      let lights = document.getElementsByTagName('div')
+      for (let i = 0; i < 3; i++) {
+        lights[i].classList.remove('light')
+      }
+      document.getElementsByClassName('green')[0].classList.add('light')
+    }
+
+    function yellow () {
+      let lights = document.getElementsByTagName('div')
+      for (let i = 0; i < 3; i++) {
+        lights[i].classList.remove('light')
+      }
+      document.getElementsByClassName('yellow')[0].classList.add('light')
+    }
+
+    function red () {
+      let lights = document.getElementsByTagName('div')
+      for (let i = 0; i < 3; i++) {
+        lights[i].classList.remove('light')
+      }
+      document.getElementsByClassName('red')[0].classList.add('light')
+    }
+
+    // 传统模式
+    // function go () {
+    //   green()
+    //   setTimeout(() => {
+    //     yellow()
+    //     setTimeout(()=>{
+    //       red()
+    //       setTimeout(() => {
+    //         go()
+    //       }, 1000);
+    //     }, 2000 )
+    //   }, 3000);
+    // }
+
+    function sleep (t) {
+      return new Promise((reslove, reject)=>{
+        setTimeout(reslove, t)
+      })
+    }
+
+    // promise模式
+    // function go () {
+    //   green()
+    //   sleep(3000).then(()=>{
+    //       yellow()
+    //       return sleep(2000)
+    //   }).then(()=>{
+    //     red()
+    //     return sleep(1000)
+    //   }).then(()=>{
+    //     go()
+    //   })
+    // }
+
+    function happen (element, eventName) {
+      return new Promise((reslove, reject)=>{
+        element.addEventListener(eventName, reslove, {once: true})
+      })
+    }
+
+    // async和await模式
+    // async function go () {
+    //   while(true) {
+    //     green()
+    //     await sleep(300)
+    //     yellow()
+    //     await sleep(200)
+    //     red()
+    //     await sleep(100)
+    //   }
+    // }
+
+    // async function go () {
+    //   while(true) {
+    //     green()
+    //     await happen(document.getElementById('button'), 'click')
+    //     yellow()
+    //     await happen(document.getElementById('button'), 'click')
+    //     red()
+    //     await happen(document.getElementById('button'), 'click')
+    //   }
+    // }
+
+    function* go () {
+      while(true) {
+        green()
+        yield sleep(300)
+        yellow()
+        yield sleep(200)
+        red()
+        yield sleep(100)
+      }
+    }
+
+    function run (iterator) {
+      let {value, done} = iterator.next()
+      if (done) {
+        return
+      }
+      if (value instanceof Promise) {
+        value.then(()=>{
+          run(iterator)
+        })
+      }
+    }
+
+    function co (gnerator) {
+      return function () {
+        return run(gnerator())
+      }
+    }
+
+    go = co(go)
+
+    async function* counter() {
+      let i = 0
+      while(true) {
+        await sleep(1000)
+        yield i++
+      }
+    }
+
+    (async function(){
+      for await(let v of counter()){
+        console.log(v)
+      }
+    })()
+
+  </script>
+</body>
+</html>
